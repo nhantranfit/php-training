@@ -34,27 +34,23 @@ $result = getUserById($id);
                         <th scope="col">ID</th>
                         <th scope="col">Username</th>
                         <th scope="col">Full name</th>
-                        <th scope="col">User type</th>
                         <th scope="col">Email</th>
+                        <th scope="col">User type</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
 
                     <tr scope="row">
-                        <td><?php if ($result['user_type'] === "admin") { ?>
-                                <img src="./public/images/admin_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                            <?php } else { ?>
-                                <img src="./public/images/user_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                            <?php } ?>
+                    <td><img src="./public/images/<?php echo $result['image'];?>" class="img-fluid" alt="" style="width:50px; height:50px;"></td>
                         </td>
                         <td><?php echo $result['id']; ?></td>
                         <td><?php echo $result['username']; ?></td>
                         <td><?php echo $result['fullname']; ?></td>
-                        <td><?php echo $result['user_type']; ?></td>
                         <td><?php echo $result['email']; ?></td>
-
+                        <td><?php echo $result['user_type']; ?></td>
+                        <td> <a href='./edit.php?id=<?php echo $result['id'] ?>'><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>
                     </tr>
-
                 </tbody>
             </table>
 
