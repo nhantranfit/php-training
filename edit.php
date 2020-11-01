@@ -2,8 +2,7 @@
 session_start();
 
 include('functions.php');
-$id = isset($_GET['id']) ? $_GET['id'] : '';
-
+$id = base64_decode(isset($_GET['id']) ? $_GET['id'] : '') ;
 if (isset($_GET['edit'])) {
     if(isLoggedIn()){
         $query = "SELECT * FROM users WHERE id=" . $_SESSION['user']['id'];
@@ -25,12 +24,22 @@ $result = getUserById($id);
 </div>
 </form>
 
-<form method="post" action="">
-	<?php echo display_error(); ?>	
+<form method="post" action="" enctype="multipart/form-data">
+	<?php echo display_error(); ?>
+    <?php if (isset($_SESSION['success'])) : ?>
+                <div class="error success">
+                    <h3>
+                        <?php
+                        echo $_SESSION['success'];
+                        unset($_SESSION['success']);
+                        ?>
+                    </h3>
+                </div>
+            <?php endif ?>	
         
         <div class="input-group">
             <label>Username</label>
-            <input type="text" name="username1" value="<?php echo $result['username'] ?>">
+            <input type="text" name="username1" value="<?php echo $result['username'] ?>" disabled>
         </div>
         <div class="input-group">
             <label>Full Name</label>
@@ -40,6 +49,10 @@ $result = getUserById($id);
             <label>Email</label>
             <input type="email" name="email1" value="<?php echo $result['email'] ?>">
         </div>
+        <div class="input-group">
+			<label for="image">User Image</label>
+            <input type="file" name="image" id="image">
+		</div>
         <div class="input-group">
             <button  type="submit" class="btn" name="save_btn" onClick = "return confirm('Bạn có muốn sửa?')"> Save</button>
         </div>
