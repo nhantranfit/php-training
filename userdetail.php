@@ -41,11 +41,7 @@ $result = getUserById($id);
                 <tbody>
 
                     <tr scope="row">
-                        <td><?php if ($result['user_type'] === "admin") { ?>
-                                <img src="./public/images/admin_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                            <?php } else { ?>
-                                <img src="./public/images/user_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                            <?php } ?>
+                    <td><img src="./public/images/<?php echo $result['image'];?>" class="img-fluid" alt="" style="width:50px; height:50px;"></td>
                         </td>
                         <td><?php echo $result['id']; ?></td>
                         <td><?php echo $result['username']; ?></td>

@@ -32,59 +32,93 @@ if ($page > $total_page) $page = $total_page; //nếu trang hiện tại vượt
 $start = ($page - 1) * $limit;
 
 //lấy ra danh sách và gán vào biến $arrs:
-$arrs = mysqli_query($conn, "SELECT * from users limit $start,$limit");
+
+$sort = '';
+$attr = '';
+$arrs = [];
+if(isset($_GET['sort']) && isset($_GET['attr'])){
+    $sort = $_GET['sort'];
+    $attr = $_GET['attr'];
+    $sql = "SELECT * FROM users ORDER BY $attr $sort limit $start,$limit";
+    
+}
+else{
+    $sql = "SELECT * from users limit $start,$limit";
+}
+$arrs = mysqli_query($conn,$sql);
+
 ?>
 
 <html>
 
 <head>
     <title>Register</title>
-
     <link rel="stylesheet" href="public/css/bootstrap.min.css">
     <link rel="stylesheet" href="public/css/font-awesome.min.css">
     <link rel="stylesheet" href="public/css/styles.css">
 </head>
 
 <body>
+
     <div class="container">
         <div class="header">
-            <h2>List User</h2>
-           
+        <div class="row">
+                <div class="col-md-6">
+                <a href="list.php"> <h2 style="color: #fff;">List User</h2> </a>
+            
+                </div>
+                <div class="col-md-6">
+                    <form action="search.php" method="get" class="form-inline my-2 my-lg-0">
+                        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="keyword">
+                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="margin-top: 10px">Search</button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <form action="search.php" method="get" class="form-inline my-2 my-lg-0">
-                <input type="radio" id="username" name="check" value="username" checked="checked">
-                <label for="username">Username</label>
-                <input type="radio" id="fullname" name="check" value="fullname">
-                <label for="fullname">Fullname</label>
-                <input type="radio" id="email" name="check" value="email">
-                <label for="email">Email</label>
-                <br>
-                <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="keyword">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" style="margin-top: 10px">Search</button>
-            </form>
 
         <form>
             <?php echo display_error(); ?>
+            <?php if (isset($_SESSION['success'])) : ?>
+                <div class="error success">
+                    <h3>
+                        <?php
+                        echo $_SESSION['success'];
+                        unset($_SESSION['success']);
+                        ?>
+                    </h3>
+                </div>
+            <?php endif ?>
 
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">AVT</th>
-                        <th scope="col">Username</th>
-                        <th scope="col">Full name</th>
+                        <th scope="col">ID</th>
+                        
+                        <th scope="col">Username
+                        <?php if($sort=='desc' && $attr=='username'){?>
+                            <a href="?sort=asc&attr=username" class="fa fa-sort-alpha-asc">
+                        <?php } else{?>
+                            <a href="?sort=desc&attr=username" class="fa fa-sort-alpha-desc">
+                        <?php }?>
+                        </th>
+                
+                        <th scope="col">Full name
+                        <?php if($sort=='desc' && $attr=='fullname'){?>
+                            <a href="?sort=asc&attr=fullname" class="fa fa-sort-alpha-asc">
+                        <?php } else{?>
+                            <a href="?sort=desc&attr=fullname" class="fa fa-sort-alpha-desc">
+                        <?php }?></th>
+
                         <th scope="col">Email</th>
                         <th scope="col">Action</th>
-                    </tr>
+                    </tr>   
                 </thead>
                 <tbody>
                     <?php foreach ($arrs as $arr) : ?>
                         <tr scope="row">
-                            <td><?php if ($arr['user_type'] === "admin") { ?>
-                                    <img src="./public/images/admin_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                                <?php } else { ?>
-                                    <img src="./public/images/user_profile.png" class="img-fluid" alt="" style="width:50px;height:50px;">
-                                <?php } ?>
-                            </td>
+                            <td><img src="./public/images/<?php echo $arr['image'];?>" class="img-fluid" alt=""     style="width:50px; height:50px;"></td>
+                            <td><?php echo $arr['id']; ?></td>
                             <td><?php echo $arr['username']; ?></td>
                             <td><?php echo $arr['fullname']; ?></td>
                             <td><?php echo $arr['email']; ?></td>
@@ -94,7 +128,6 @@ $arrs = mysqli_query($conn, "SELECT * from users limit $start,$limit");
                                 <a href='./edit.php?id=<?php echo $arr['id'] ?>'><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
 
                                 <a href='delete_user.php?id=<?php echo $arr['id'] ?>' name="delete_user"><i class="fa fa-times" aria-hidden="true" onClick="return confirm('Nhấn oke để xoá.')"></i></a>
-
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -103,15 +136,35 @@ $arrs = mysqli_query($conn, "SELECT * from users limit $start,$limit");
         </form>
         <ul class="pagination">
             <?php for ($i = 1; $i <= $total_page; $i++) { ?>
-                <li <?php if ($page == $i) echo "class='active'"; ?>><a href="list.php?list=<?php echo $i; ?>"><?php echo $i; ?></a></li>
+                <li <?php if ($page == $i) echo "class='active'"; ?>>
+
+                <?php if($sort == 'desc' && $attr == 'username'){?>
+
+                    <a href="?sort=desc&attr=username&list=<?php echo $i; ?>">
+
+                <?php }else if($sort == 'asc' && $attr == 'username') {?>
+
+                    <a href="?sort=asc&attr=username&list=<?php echo $i; ?>">
+
+                <?php }else if($sort == 'desc' && $attr == 'fullname') {?>
+
+                    <a href="?sort=desc&attr=fullname&list=<?php echo $i; ?>">
+
+                <?php }else if($sort == 'asc' && $attr == 'fullname') {?>
+
+                    <a href="?sort=asc&attr=fullname&list=<?php echo $i; ?>">
+               
+                <?php }else{?>
+                    <a href="list.php?list=<?php echo $i; ?>">
+                <?php }?>
+        
+                <?php echo $i; ?></a></li>
             <?php } ?>
         </ul>
         <div class="back" style="text-align: center">
             <button type="button" class="btn btn-info" onClick="javascript:history.go(-1)">Back</button>
-            <br><a href="admin.php">Add User ++</a>
-
+            <a href="admin.php" class="btn btn-info">Add User ++</a>
         </div>
     </div>
 </body>
-
 </html>

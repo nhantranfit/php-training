@@ -15,20 +15,12 @@ function searchByUsername($keyword)
 	return $result;
 }
 
-function search($keyword, $check)
+function searchUser($keyword)
 {
 	global $conn;
 	$query = '';
 	$result = [];
-	if($check == 'username'){
-		$query = ("SELECT * FROM users WHERE username LIKE '%$keyword%'");
-	}
-	if($check == 'fullname'){
-		$query = ("SELECT * FROM users WHERE fullname LIKE '%$keyword%'");
-	}
-	if($check == 'email'){
-		$query = ("SELECT * FROM users WHERE email = '$keyword'");	
-	}
+	$query = ("SELECT * FROM users WHERE username LIKE '%$keyword%' or fullname LIKE '%$keyword%' or email LIKE '%$keyword%'");
 	$result = mysqli_query($conn, $query);
 	return $result;
 }
@@ -84,12 +76,29 @@ function register()
 		$password = md5($password_1);
 
 		if (isset($_POST['user_type'])) {
-			$user_type = escape($_POST['user_type']);
-			$query = "INSERT INTO users (username,fullname, email, user_type, password) 
-					  VALUES('$username', '$fullname', '$email', '$user_type', '$password')";
-			mysqli_query($conn, $query);
-			$_SESSION['success']  = "New user successfully created!!";
-			header('location: home.php');
+			if (!empty($_FILES['image']['name'])) {
+				$user_type = escape($_POST['user_type']);
+				$image = 'public/images/' . basename($_FILES['image']['name']);
+				$imageType = pathinfo($image, PATHINFO_EXTENSION);
+				$allowType = array('jpg', 'png');
+				if(in_array($imageType, $allowType) && $_FILES['image']['size'] < 2 * 1024 * 1024){
+					if (is_uploaded_file($_FILES['image']['tmp_name']) && move_uploaded_file($_FILES['image']['tmp_name'], $image)){
+						$images = basename($image);
+						$query = "INSERT INTO users (username,fullname, email, user_type, password, image) 
+							  VALUES('$username', '$fullname', '$email', '$user_type', '$password', '$images')";
+						mysqli_query($conn, $query);
+						$_SESSION['success']  = "New user successfully created!!";
+						header('location: home.php');
+					}
+				}
+				else{
+					$_SESSION['success']  = "Add user failed";
+				}
+				
+			}
+			else{
+				$_SESSION['success']  = "Select user image";
+			}
 		} else {
 			$query = "INSERT INTO users (username, fullname, email, user_type, password) 
 					  VALUES('$username', '$fullname', '$email', 'user', '$password')";
@@ -127,32 +136,62 @@ function edit()
 function editId($id)
 {
 	global $conn, $id, $errors, $username, $fullname, $email;
-	$username    =  escape($_POST['username1']);
+	// $username    =  escape($_POST['username1']);
 	$fullname    =  escape($_POST['fullname1']);
 	$email       =  escape($_POST['email1']);
+	
+	if (!empty($_FILES['image']['name'])){
+		
+			$image = 'public/images/' . basename($_FILES['image']['name']);
+			$imageType = pathinfo($image, PATHINFO_EXTENSION);
+			$allowType = array('jpg', 'png');
+			if(in_array($imageType, $allowType) && $_FILES['image']['size'] < 2 * 1024 * 1024){
+				if (is_uploaded_file($_FILES['image']['tmp_name']) && move_uploaded_file($_FILES['image']['tmp_name'], $image)) 
+			{
+				$images = basename($image);
+				mysqli_query($conn, "UPDATE `users` SET `fullname` = '$fullname', `email`='$email', `image` = '$images' WHERE `id` = '$id'");
 
-	mysqli_query($conn, "UPDATE `users` SET `username` = '$username', `fullname` = '$fullname', `email`='$email' WHERE `id` = '$id'");
+				$_SESSION['success']  = "Change successfully";
+				// // header("Refresh:2; url=page2.php");
+				if (isset($_COOKIE["user"]) and isset($_COOKIE["pass"])) {
+					setcookie("user", '', time() - 3600);
+					setcookie("pass", '', time() - 3600);
+				}
+				
+				header("location: list.php?list='1'");
+			}
+			}
+			else{
+				$_SESSION['success']  = "Update user failed";
+			}
+			}
+			
+	else{
+		mysqli_query($conn, "UPDATE `users` SET `fullname` = '$fullname', `email`='$email' WHERE `id` = '$id'");
 
-	$_SESSION['success']  = "Change successfully";
-	// // header("Refresh:2; url=page2.php");
-	if (isset($_COOKIE["user"]) and isset($_COOKIE["pass"])) {
-		setcookie("user", '', time() - 3600);
-		setcookie("pass", '', time() - 3600);
+			$_SESSION['success']  = "Change successfully";
+			// // header("Refresh:2; url=page2.php");
+			if (isset($_COOKIE["user"]) and isset($_COOKIE["pass"])) {
+				setcookie("user", '', time() - 3600);
+				setcookie("pass", '', time() - 3600);
+			}
+			header("location: list.php?list='1'");
 	}
-	header('location: home.php');
+	
+	
 }
 
 if (isset($_POST['save_btn'])) {
 	editId($id);
 }
 
-function searchUser($keyword)
-{
-	global $conn;
-	$sql = "SELECT * FROM users WHERE username  LIKE '%$keyword%'";
-	$result = mysqli_query($conn, $sql);
-	return $result;
-}
+// function searchUser($keyword)
+// {
+// 	global $conn;
+// 	$sql = "SELECT * FROM users WHERE username  LIKE '%$keyword%'";
+// 	$result = mysqli_query($conn, $sql);
+// 	return $result;
+// }
 
 function getUserById($id)
 {
