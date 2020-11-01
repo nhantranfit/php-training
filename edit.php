@@ -2,7 +2,6 @@
 session_start();
 
 include('functions.php');
-$id = isset($_GET['id']) ? $_GET['id'] : '';
 
 if (isset($_GET['edit'])) {
     if(isLoggedIn()){
@@ -11,7 +10,6 @@ if (isset($_GET['edit'])) {
         
     }
 }
-$result = getUserById($id);
 ?>
 
 <html>
@@ -30,24 +28,23 @@ $result = getUserById($id);
         
         <div class="input-group">
             <label>Username</label>
-            <input type="text" name="username1" value="<?php echo $result['username'] ?>">
+            <input type="text" name="username1" >
         </div>
         <div class="input-group">
             <label>Full Name</label>
-            <input type="text" name="fullname1" value="<?php echo $result['fullname'] ?>">
+            <input type="text" name="fullname1">
         </div>
         <div class="input-group">
             <label>Email</label>
-            <input type="email" name="email1" value="<?php echo $result['email'] ?>">
+            <input type="email" name="email1">
         </div>
         <div class="input-group">
-            <button  type="submit" class="btn" name="save_btn" onClick = "return confirm('Bạn có muốn sửa?')"> Save</button>
+            <button  type="submit" class="btn" name="save_btn"> Save</button>
         </div>
 
 </form>
-<div class="back" style="text-align: center">
-    <input type="button" value="Back" onClick="javascript:history.go(-2)" />
-</div>
+<p  class="back"  style="text-align: center">
+		<a href="http://localhost/php-training1/home.php">Back</a></p>
 	
 
 
